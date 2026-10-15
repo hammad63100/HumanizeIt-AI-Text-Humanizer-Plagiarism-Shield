@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # PostgreSQL Database
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: humanizer_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: humanizer
+      POSTGRES_PASSWORD: humanizer_secret_password
+      POSTGRES_DB: humanizer_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U humanizer -d humanizer_db']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # Redis Cache & Queue
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: humanizer_redis
+    restart: always
+    command: redis-server --appendonly yes
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # API Backend Server
+  # ==========================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: humanizer_api
+    restart: always
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://humanizer:humanizer_secret_password@postgres:5432/humanizer_db
+      REDIS_URL: redis://redis:6379/0
+      AUTH_JWT_SECRET: production_jwt_secret_key_change_me_in_prod
+      AUTH_JWT_EXPIRES_IN: 7d
+      FRONTEND_URL: http://localhost:3000
+
+volumes:
+  pgdata:
+  redisdata:

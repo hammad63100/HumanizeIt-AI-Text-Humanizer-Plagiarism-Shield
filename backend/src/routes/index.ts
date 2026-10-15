@@ -1,0 +1,13 @@
+export { default as authRoutes } from './auth';
+export { default as humanizeRoutes } from './humanize';
+export { default as jobsRoutes } from './jobs';
+export { default as detectRoutes } from './detect';
+export { default as plagiarismRoutes } from './plagiarism';
+export { default as rewriteSentenceRoutes } from './rewriteSentence';
+export { default as citationsRoutes } from './citations';
+export { default as usageRoutes } from './usage';
+export { default as documentsRoutes } from './documents';
+export { default as voiceProfileRoutes } from './voiceProfile';
+export { default as uploadsRoutes } from './uploads';
+export { default as billingRoutes } from './billing';
+export { default as healthRoutes } from './health';
